@@ -1,0 +1,25 @@
+[versions]
+agp = "8.7.3"
+kotlin = "2.0.21"
+appcompat = "1.7.0"
+coordinatorlayout = "1.2.0"
+material = "1.12.0"
+espresso = "3.6.1"
+uiautomator = "2.3.0"
+testCore = "1.6.1"
+composeBom = "2024.10.01"
+
+[libraries]
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-coordinatorlayout = { group = "androidx.coordinatorlayout", name = "coordinatorlayout", version.ref = "coordinatorlayout" }
+google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espresso" }
+androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "testCore" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
