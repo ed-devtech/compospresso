@@ -2,7 +2,9 @@ package dev.eddev.compospresso.uielement.compose
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 
 interface ComposeMatcher {
@@ -29,6 +31,14 @@ interface ComposeMatcher {
                         require(nodes.isNotEmpty()) { "No nodes found with content description: $desc" }
                         interactionCollection[nodes.lastIndex]
                     }
+            }
+        }
+
+        fun testTag(tag: String): ComposeMatcher = object : ComposeMatcher {
+            override fun toNodeInteraction(): SemanticsNodeInteraction {
+                return ComposeTestRegistry
+                    .getRule()
+                    .onNodeWithTag(tag)
             }
         }
     }
