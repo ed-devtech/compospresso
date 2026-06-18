@@ -1,37 +1,57 @@
 package dev.eddev.compospresso.uielement
 
 import android.graphics.Point
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
+import androidx.compose.ui.test.swipeUp
 import androidx.test.espresso.ViewAction
 import dev.eddev.compospresso.interaction.Direction
+import dev.eddev.compospresso.internal.CompospressoError
+import dev.eddev.compospresso.internal.TAG
 import dev.eddev.compospresso.uielement.compose.ComposeMatcher
 import dev.eddev.compospresso.uielement.compose.ComposeTestRegistry
 
-class ComposeElement(private val composeMatcher: ComposeMatcher) : UiElement {
-    private fun node() = composeMatcher.toNodeInteraction()
+class ComposeElement(
+    private val composeMatcher: ComposeMatcher
+) : UiElement {
+    private fun node(): SemanticsNodeInteraction = composeMatcher.toNodeInteraction()
 
     override fun tap(timeOut: Long) {
+        if (timeOut > 0L) waitDisplayed(timeOut)
         node().performClick()
     }
 
     override fun longTap() {
-        TODO("Not yet implemented")
+        node().performTouchInput { longClick() }
     }
 
     override fun doubleTap() {
-        TODO("Not yet implemented")
+        node().performTouchInput { doubleClick() }
     }
 
     override fun putText(
         text: String,
         timeOut: Long
     ) {
-        TODO("Not yet implemented")
+        if (timeOut > 0L) waitDisplayed(timeOut)
+        node().performTextInput(text)
     }
 
     override fun clearTextInput() {
-        TODO("Not yet implemented")
+        node().performTextClearance()
     }
 
     override fun setDate(
@@ -39,23 +59,32 @@ class ComposeElement(private val composeMatcher: ComposeMatcher) : UiElement {
         month: Int,
         day: Int
     ) {
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException(
+            "setDate is not supported for Compose elements; interact with the picker via semantics instead"
+        )
     }
 
     override fun swipe(direction: Direction) {
-        TODO("Not yet implemented")
+        node().performTouchInput {
+            when (direction) {
+                Direction.UP -> swipeUp()
+                Direction.DOWN -> swipeDown()
+                Direction.LEFT -> swipeLeft()
+                Direction.RIGHT -> swipeRight()
+            }
+        }
     }
 
     override fun pinchIn(params: Map<String, Int>?) {
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException("pinchIn is not supported for Compose elements")
     }
 
     override fun pinchOut(params: Map<String, Int>?) {
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException("pinchOut is not supported for Compose elements")
     }
 
     override fun perform(action: ViewAction) {
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException("Espresso ViewAction cannot be applied to a Compose element")
     }
 
     override fun isDisplayed(): Boolean {
@@ -71,22 +100,40 @@ class ComposeElement(private val composeMatcher: ComposeMatcher) : UiElement {
     }
 
     override fun isEnabled(): Boolean {
-        TODO("Not yet implemented")
+        return try {
+            node().assertIsEnabled()
+            true
+        } catch (e: AssertionError) {
+            false
+        }
     }
 
     override fun isChecked(): Boolean {
-        TODO("Not yet implemented")
+        val config = node().fetchSemanticsNode().config
+        config.getOrNull(SemanticsProperties.ToggleableState)?.let {
+            return it == ToggleableState.On
+        }
+        config.getOrNull(SemanticsProperties.Selected)?.let {
+            return it
+        }
+        throw CompospressoError(TAG, "Node has no toggleable/selected state")
     }
 
     override fun getText(): String {
-        TODO("Not yet implemented")
+        val config = node().fetchSemanticsNode().config
+        config.getOrNull(SemanticsProperties.EditableText)?.let { return it.text }
+        config.getOrNull(SemanticsProperties.Text)?.let { texts ->
+            return texts.joinToString(separator = "") { it.text }
+        }
+        return ""
     }
 
     override fun waitDisplayed(timeOut: Long): Boolean {
         return try {
-            ComposeTestRegistry.getRule().waitUntil(timeOut) {
-                isDisplayed()
-            }
+            ComposeTestRegistry.getRule()
+                .waitUntil(timeOut) {
+                    isDisplayed()
+                }
             true
         } catch (e: Exception) {
             false
@@ -94,10 +141,19 @@ class ComposeElement(private val composeMatcher: ComposeMatcher) : UiElement {
     }
 
     override fun waitNotDisplayed(timeOut: Long): Boolean {
-        TODO("Not yet implemented")
+        return try {
+            ComposeTestRegistry.getRule()
+                .waitUntil(timeOut) {
+                    !isDisplayed()
+                }
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override fun getPoint(): Point {
-        TODO("Not yet implemented")
+        val bounds = node().fetchSemanticsNode().boundsInWindow
+        return Point(bounds.left.toInt(), bounds.top.toInt())
     }
 }

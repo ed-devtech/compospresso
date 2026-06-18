@@ -68,29 +68,22 @@ sealed interface UiElement {
 }
 
 // --- Espresso ---
-@Suppress("FunctionName")
 fun UiElement(vararg resIds: Int) = MatcherViewElement(resIds.resourceMatcher())
 
-@Suppress("FunctionName")
 fun UiElement(
     resId: Int,
     text: String
 ) = MatcherViewElement(MatcherView(resId, text))
 
-@Suppress("FunctionName")
 fun UiElement(matcher: Matcher<View>) = MatcherViewElement(matcher)
 
-@Suppress("FunctionName")
 fun UiElement(matcherView: MatcherView) = MatcherViewElement(matcherView)
 
-@Suppress("FunctionName")
 fun UiElement(builder: MatcherViewBuilder) = MatcherViewElement(builder.buildMatcher())
 // -- end of: Espresso region --
 
-@Suppress("FunctionName")
 fun UiElement(uiSelector: UiSelector) = UiSelectorElement(uiSelector)
 
-@Suppress("FunctionName")
 fun UiElement(composeMatcher: ComposeMatcher) = ComposeElement(composeMatcher)
 
 fun UiElement.withLogging(elementName: String): UiElement {
